@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Box</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: radial-gradient(circle, #f7a2a2, #ffb3b3), url('https://www.transparenttextures.com/patterns/denim.png');
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        .box {
+            border: 2px solid #fff;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            position: relative;
+            width: 300px;
+            height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .emoji {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            color: white;
+            background-color: #ff6f61;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 5px;
+            position: absolute;
+        }
+
+        .button:hover {
+            opacity: 0.8;
+        }
+
+        .no-button {
+            background-color: #28a745;
+        }
+
+        .yes-button {
+            background-color: #dc3545;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .overlay-content {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            position: relative;
+        }
+
+        .heart, .angel {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            animation: float 5s ease-in-out infinite;
+        }
+
+        .heart {
+            background: #ff6f61;
+            border-radius: 50%;
+            background-image: url('https://www.transparenttextures.com/patterns/purty-wood.png');
+            background-size: cover;
+        }
+
+        .angel {
+            font-size: 30px;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+            100% { transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="emoji">💖</div>
+        <p>TARA SA ELEVATE?</p>
+        <button class="button no-button" id="noButton" style="top: 80px; left: 10px;">No</button>
+        <button class="button yes-button" id="yesButton" style="top: 80px; right: 10px;">Yes</button>
+    </div>
+
+    <div class="overlay" id="overlay">
+        <div class="overlay-content" id="overlayContent">
+            YOWN SEE YOU!
+        </div>
+    </div>
+
+    <script>
+        const yesButton = document.getElementById('yesButton');
+        const noButton = document.getElementById('noButton');
+        const overlay = document.getElementById('overlay');
+        const overlayContent = document.getElementById('overlayContent');
+
+        let movingInterval;
+        let isMoving = false;
+
+        function startMovingNoButton() {
+            movingInterval = setInterval(() => {
+                if (isMoving) {
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    const buttonWidth = noButton.offsetWidth;
+                    const buttonHeight = noButton.offsetHeight;
+                    const randomX = Math.random() * (viewportWidth - buttonWidth);
+                    const randomY = Math.random() * (viewportHeight - buttonHeight);
+
+                    noButton.style.position = 'fixed';
+                    noButton.style.left = `${randomX}px`;
+                    noButton.style.top = `${randomY}px`;
+                }
+            }, 100); // Move every 100 milliseconds
+        }
+
+        function stopMovingNoButton() {
+            clearInterval(movingInterval);
+            isMoving = false;
+            noButton.style.position = 'absolute'; // Reset position to relative to the parent container
+        }
+
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            document.body.appendChild(heart);
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            heart.style.left = `${x}px`;
+            heart.style.top = `${y}px`;
+            setTimeout(() => {
+                document.body.removeChild(heart);
+            }, 5000); // Remove heart after 5 seconds
+        }
+
+        function createFloatingAngel() {
+            const angel = document.createElement('div');
+            angel.className = 'angel';
+            angel.textContent = '👼';
+            document.body.appendChild(angel);
+            const x = Math.random() * window.innerWidth;
+            const y = Math.random() * window.innerHeight;
+            angel.style.left = `${x}px`;
+            angel.style.top = `${y}px`;
+            setTimeout(() => {
+                document.body.removeChild(angel);
+            }, 5000); // Remove angel after 5 seconds
+        }
+
+        function handleMouseMove(event) {
+            const buttonRect = noButton.getBoundingClientRect();
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+
+            // Calculate distance from the cursor to the center of the button
+            const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+            const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+            const distance = Math.sqrt((mouseX - buttonCenterX) ** 2 + (mouseY - buttonCenterY) ** 2);
+
+            // If cursor is within 100px of the button, start moving it
+            if (distance < 100) {
+                isMoving = true;
+            } else {
+                isMoving = false;
+            }
+        }
+
+        function handleTouchMove(event) {
+            const touch = event.touches[0];
+            const buttonRect = noButton.getBoundingClientRect();
+            const touchX = touch.clientX;
+            const touchY = touch.clientY;
+
+            // Calculate distance from the touch point to the center of the button
+            const buttonCenterX = buttonRect.left + buttonRect.width / 2;
+            const buttonCenterY = buttonRect.top + buttonRect.height / 2;
+            const distance = Math.sqrt((touchX - buttonCenterX) ** 2 + (touchY - buttonCenterY) ** 2);
+
+            // If touch is within 100px of the button, start moving it
+            if (distance < 100) {
+                isMoving = true;
+            } else {
+                isMoving = false;
+            }
+        }
+
+        noButton.addEventListener('click', () => {
+            stopMovingNoButton();
+            alert('You clicked No!');
+        });
+
+        noButton.addEventListener('touchstart', (event) => {
+            // Prevent the default touch behavior
+            event.preventDefault();
+            // Move the button when touched
+            handleTouchMove(event);
+        });
+
+        yesButton.addEventListener('click', () => {
+            // Darken the screen and show the overlay
+            overlay.style.display = 'flex';
+
+            // Create floating hearts and angels
+            for (let i = 0; i < 20; i++) {
+                createFloatingHeart();
+            }
+            for (let i = 0; i < 10; i++) {
+                createFloatingAngel();
+            }
+        });
+
+        // Start moving the No button when the page loads
+        startMovingNoButton();
+
+        // Add event listeners for mouse and touch movements
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('touchmove', handleTouchMove);
+    </script>
+</body>
+</html>
+
